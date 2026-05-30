@@ -2,6 +2,20 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+const tokenGenerator = async(user)=>{
+    return await jwt.sign(
+      {
+        id: user._id,
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "2d",
+      }
+    );
+};
+
+
 const registerUser = async (req, res) => {
   try {
     const { name, email,student_id, password, role, branch, year } = req.body;
@@ -23,10 +37,14 @@ const registerUser = async (req, res) => {
       year,
     });
 
+    const token = await tokenGenerator(user);
+
     res.status(201).json({
       success: true,
       message: "User Registered Successfully",
       user,
+      token,
+
     });
   } catch (error) {
     res.status(500).json({
@@ -61,16 +79,7 @@ const loginUser = async (req, res) => {
       });
     }
 
-    const token = jwt.sign(
-      {
-        id: user._id,
-        role: user.role,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "2d",
-      }
-    );
+    const token = tokenGenerator(user);
 
     res.status(200).json({
         success: true,
