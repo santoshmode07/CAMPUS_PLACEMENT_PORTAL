@@ -1,5 +1,6 @@
 const Application = require("../models/Application");
 const Job = require("../models/Job");
+const User = require("../models/User");
 const ErrorHandler = require("../utils/errorHandler");
 
 const applyForJob = async (req, res, next) => {
@@ -9,6 +10,27 @@ const applyForJob = async (req, res, next) => {
     const job = await Job.findById(jobId);
     if (!job) {
       return next(new ErrorHandler("Job not found", 404));
+    }
+
+    // 1. Job Deadline Validation
+    if (new Date() > new Date(job.deadline)) {
+      return next(new ErrorHandler("Application deadline has passed for this job", 400));
+    }
+
+    // Fetch full student document to get branch info
+    const student = await User.findById(req.user.id);
+    if (!student) {
+      return next(new ErrorHandler("Student profile not found", 404));
+    }
+
+    // 2. Eligible Branches Check
+    if (!job.eligibleBranches.includes(student.branch)) {
+      return next(
+        new ErrorHandler(
+          `Your branch (${student.branch}) is not eligible to apply for this job. Eligible branches: ${job.eligibleBranches.join(", ")}`,
+          403
+        )
+      );
     }
 
     const existingApplication = await Application.findOne({

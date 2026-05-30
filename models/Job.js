@@ -26,6 +26,11 @@ const jobSchema= new mongoose.Schema({
         type:Date,
         required:true
     },
+    eligibleBranches: {
+        type: [String],
+        required: true,
+        enum: ["CSE", "ECE", "EEE", "Mech", "CIVIL"]
+    },
     createdBy:{
         type: mongoose.Schema.Types.ObjectId,
         ref:"User",

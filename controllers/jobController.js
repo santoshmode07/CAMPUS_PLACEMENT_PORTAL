@@ -3,10 +3,14 @@ const ErrorHandler = require("../utils/errorHandler");
 
 const createJob = async (req, res, next) => {
   try {
-    const { title, company, description, ctc, location, deadline } = req.body;
+    const { title, company, description, ctc, location, deadline, eligibleBranches } = req.body;
 
-    if (!title || !company || !description || !ctc || !location || !deadline) {
-      return next(new ErrorHandler("Please fill in all required fields", 400));
+    if (!title || !company || !description || !ctc || !location || !deadline || !eligibleBranches) {
+      return next(new ErrorHandler("Please fill in all required fields including eligible branches", 400));
+    }
+
+    if (!Array.isArray(eligibleBranches) || eligibleBranches.length === 0) {
+      return next(new ErrorHandler("Eligible branches must be a non-empty array", 400));
     }
 
     const job = await Job.create({
@@ -16,6 +20,7 @@ const createJob = async (req, res, next) => {
       ctc,
       location,
       deadline,
+      eligibleBranches,
       createdBy: req.user.id,
     });
 
