@@ -18,10 +18,27 @@ const tokenGenerator = async (user) => {
 
 const registerUser = async (req, res, next) => {
   try {
-    const { name, email, student_id, password, role, branch, year } = req.body;
+    const { name, email, student_id, password, role, branch, year, cgpa, skills, resumeLink } = req.body;
+
+    const userRole = role || "student";
 
     if (!name || !email || !student_id || !password || !branch || !year) {
       return next(new ErrorHandler("Please fill in all required fields", 400));
+    }
+
+    if (userRole === "student") {
+      if (cgpa === undefined || !skills || !resumeLink) {
+        return next(new ErrorHandler("Students must provide cgpa, skills, and a Google Drive resume link", 400));
+      }
+      if (typeof cgpa !== "number" || cgpa < 0 || cgpa > 10) {
+        return next(new ErrorHandler("CGPA must be a number between 0 and 10", 400));
+      }
+      if (!Array.isArray(skills)) {
+        return next(new ErrorHandler("Skills must be an array of strings", 400));
+      }
+      if (typeof resumeLink !== "string" || !resumeLink.includes("drive.google.com")) {
+        return next(new ErrorHandler("Resume link must be a valid Google Drive link containing drive.google.com", 400));
+      }
     }
 
     const existingUser = await User.findOne({ email });
@@ -40,9 +57,12 @@ const registerUser = async (req, res, next) => {
       email,
       student_id,
       password: hashedPassword,
-      role,
+      role: userRole,
       branch,
       year,
+      cgpa: userRole === "student" ? cgpa : undefined,
+      skills: userRole === "student" ? skills : undefined,
+      resumeLink: userRole === "student" ? resumeLink : undefined,
     });
 
     const token = await tokenGenerator(user);
@@ -58,6 +78,9 @@ const registerUser = async (req, res, next) => {
         role: user.role,
         branch: user.branch,
         year: user.year,
+        cgpa: user.cgpa,
+        skills: user.skills,
+        resumeLink: user.resumeLink,
       },
       token,
     });
