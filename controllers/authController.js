@@ -79,7 +79,7 @@ const loginUser = async (req, res) => {
       });
     }
 
-    const token = tokenGenerator(user);
+    const token = await tokenGenerator(user);
 
     res.status(200).json({
         success: true,
