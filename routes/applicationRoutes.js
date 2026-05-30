@@ -5,7 +5,9 @@ const authorize = require("../middleware/roleMiddleware");
 
 const {
   applyForJob,
-  getMyApplications
+  getMyApplications,
+  getApplicantsForJob,
+  updateApplicationStatus
 } = require("../controllers/applicationController");
 
 const router = express.Router();
@@ -21,6 +23,19 @@ router.get(
    protect,
    authorize("student"),
    getMyApplications
+);
+router.get(
+   "/job/:jobId",
+   protect,
+   authorize("company","admin"),
+   getApplicantsForJob
+);
+
+router.patch(
+   "/:applicationId",
+   protect,
+   authorize("company","admin"),
+   updateApplicationStatus
 );
 
 module.exports = router;
