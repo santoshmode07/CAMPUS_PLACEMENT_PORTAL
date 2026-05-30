@@ -1,13 +1,14 @@
+const ErrorHandler = require("../utils/errorHandler");
+
 const authorize = (...roles) => {
-    return (req,res,next)=>{
-        if(!roles.includes(req.user.role)){
-            return res.status(403).json({
-                success:false,
-                message:"You are not authorized to perform this action"
-            })
-        }
-        next();
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new ErrorHandler("You are not authorized to perform this action", 403)
+      );
     }
+    next();
+  };
 };
 
 module.exports = authorize;

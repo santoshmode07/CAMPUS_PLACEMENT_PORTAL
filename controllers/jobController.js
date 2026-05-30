@@ -1,16 +1,13 @@
 const Job = require("../models/Job");
+const ErrorHandler = require("../utils/errorHandler");
 
-const createJob = async (req, res) => {
+const createJob = async (req, res, next) => {
   try {
+    const { title, company, description, ctc, location, deadline } = req.body;
 
-    const {
-      title,
-      company,
-      description,
-      ctc,
-      location,
-      deadline
-    } = req.body;
+    if (!title || !company || !description || !ctc || !location || !deadline) {
+      return next(new ErrorHandler("Please fill in all required fields", 400));
+    }
 
     const job = await Job.create({
       title,
@@ -19,135 +16,85 @@ const createJob = async (req, res) => {
       ctc,
       location,
       deadline,
-      createdBy: req.user.id
+      createdBy: req.user.id,
     });
 
     res.status(201).json({
       success: true,
       message: "Job Created Successfully",
-      job
+      job,
     });
-
   } catch (error) {
-
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-
+    next(error);
   }
 };
 
-
-const getAllJobs = async (req, res) => {
+const getAllJobs = async (req, res, next) => {
   try {
-
-    const jobs = await Job.find().populate("createdBy","name email role");
+    const jobs = await Job.find().populate("createdBy", "name email role");
 
     res.status(200).json({
       success: true,
       count: jobs.length,
-      jobs
+      jobs,
     });
-
   } catch (error) {
-
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-
+    next(error);
   }
 };
 
-const getJobById = async (req, res) => {
+const getJobById = async (req, res, next) => {
   try {
-
     const job = await Job.findById(req.params.id);
 
     if (!job) {
-      return res.status(404).json({
-        success: false,
-        message: "Job not found"
-      });
+      return next(new ErrorHandler("Job not found", 404));
     }
 
     res.status(200).json({
       success: true,
-      job
+      job,
     });
-
   } catch (error) {
-
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-
+    next(error);
   }
 };
 
-const updateJob = async (req, res) => {
+const updateJob = async (req, res, next) => {
   try {
-
-    const job = await Job.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true
-      }
-    );
+    const job = await Job.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!job) {
-      return res.status(404).json({
-        success: false,
-        message: "Job not found"
-      });
+      return next(new ErrorHandler("Job not found", 404));
     }
 
     res.status(200).json({
       success: true,
       message: "Job Updated Successfully",
-      job
+      job,
     });
-
   } catch (error) {
-
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-
+    next(error);
   }
 };
 
-const deleteJob = async (req, res) => {
+const deleteJob = async (req, res, next) => {
   try {
-
-    const job = await Job.findByIdAndDelete(
-      req.params.id
-    );
+    const job = await Job.findByIdAndDelete(req.params.id);
 
     if (!job) {
-      return res.status(404).json({
-        success: false,
-        message: "Job not found"
-      });
+      return next(new ErrorHandler("Job not found", 404));
     }
 
     res.status(200).json({
       success: true,
-      message: "Job Deleted Successfully"
+      message: "Job Deleted Successfully",
     });
-
   } catch (error) {
-
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-
+    next(error);
   }
 };
 
@@ -156,5 +103,5 @@ module.exports = {
   getAllJobs,
   getJobById,
   updateJob,
-  deleteJob
+  deleteJob,
 };

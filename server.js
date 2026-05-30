@@ -4,6 +4,7 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const jobRoutes = require("./routes/jobRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
+const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 
 const cors = require("cors");
 
@@ -24,6 +25,10 @@ app.get("/", (req,res)=>{
         message:"Campus Placement Portal Backend Running"
     });
 });
+
+// Error handling middleware
+app.use(notFound);
+app.use(errorHandler);
 
 app.listen(3000,()=>{
     console.log("server is running on port 3000");
