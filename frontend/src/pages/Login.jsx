@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Login.css';
 
 const Login = () => {
+  // Initialize useNavigate hook for programmatic routing
+  const navigate = useNavigate();
+  
   // Access the login function from our custom Auth Hook
   const { login } = useAuth();
 
@@ -34,7 +38,10 @@ const Login = () => {
 
       setSuccess('Login Successful! Redirecting...');
       
-      // NOTE: Navigation to the dashboard (React Router) will be implemented here later
+      // Redirect to the dashboard after a short delay so the user can see the success message
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1000);
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Login failed. Please verify credentials.';
       setError(errorMessage);
@@ -53,7 +60,7 @@ const Login = () => {
         {success && <div className="alert alert-success">{success}</div>}
 
         <form className="login-form" onSubmit={handleSubmit}>
-          
+
           <div className="form-group">
             <label htmlFor="email">Email Address</label>
             <input
@@ -63,6 +70,7 @@ const Login = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="e.g. name@student.com"
+              autoComplete="off"
               required
             />
           </div>
@@ -77,6 +85,7 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
               placeholder="••••••••"
+              autoComplete="current-password"
               required
             />
           </div>

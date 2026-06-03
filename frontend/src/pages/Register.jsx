@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Register.css';
 
 const Register = () => {
+  // Initialize useNavigate hook for routing
+  const navigate = useNavigate();
+
   // Access the register function from our custom Auth Hook
   const { register } = useAuth();
 
@@ -75,6 +78,11 @@ const Register = () => {
       await register(payload);
 
       setSuccess('Student Account Registered Successfully! Redirecting...');
+
+      // Redirect to dashboard after a short delay so they see the success message
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1500);
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Registration failed. Please check inputs.';
       setError(errorMessage);
