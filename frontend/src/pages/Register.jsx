@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import './Register.css';
 
 const Register = () => {
-  // State for student registration form inputs
+  // Access the register function from our custom Auth Hook
+  const { register } = useAuth();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,12 +19,10 @@ const Register = () => {
     resumeLink: '',
   });
 
-  // UI state management
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Handle standard input updates
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -30,7 +30,6 @@ const Register = () => {
     });
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -45,7 +44,7 @@ const Register = () => {
       password: formData.password,
       role: 'student', // Hardcoded student role
       branch: formData.branch,
-      year: Number(formData.year), // Backend expects year as a number
+      year: Number(formData.year),
     };
 
     // Validate CGPA
@@ -72,17 +71,10 @@ const Register = () => {
     payload.resumeLink = formData.resumeLink;
 
     try {
-      // API call to register endpoint
-      const response = await api.post('/auth/register', payload);
-
-      const { token, user } = response.data;
-
-      // Store credentials in localStorage on successful sign up
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+      // Register via AuthContext. The backend automatically sets the cookie.
+      await register(payload);
 
       setSuccess('Student Account Registered Successfully! Redirecting...');
-      console.log('Registered Student Details:', user);
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Registration failed. Please check inputs.';
       setError(errorMessage);

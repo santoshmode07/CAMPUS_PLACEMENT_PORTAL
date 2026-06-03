@@ -1,0 +1,143 @@
+.dashboard-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 90vh;
+  padding: 40px 20px;
+  box-sizing: border-box;
+}
+
+.dashboard-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 800px;
+  text-align: left;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.dashboard-title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+.dashboard-subtitle {
+  margin: 8px 0 0;
+  font-size: 16px;
+  color: var(--text);
+}
+
+.logout-btn {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background-color: #ef4444;
+  color: #fff;
+}
+
+.profile-section h2 {
+  font-size: 20px;
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: var(--text-h);
+  border-left: 4px solid var(--accent);
+  padding-left: 12px;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.profile-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-item.full-width {
+  grid-column: span 2;
+}
+
+.profile-item .label {
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text);
+}
+
+.profile-item .value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.skills-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skill-tag {
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.resume-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+  transition: opacity 0.2s;
+}
+
+.resume-link:hover {
+  text-decoration: underline;
+}
+
+.loading-text {
+  text-align: center;
+  font-size: 18px;
+  color: var(--text);
+  margin-top: 100px;
+}
+
+@media (max-width: 600px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+  .profile-item.full-width {
+    grid-column: span 1;
+  }
+}

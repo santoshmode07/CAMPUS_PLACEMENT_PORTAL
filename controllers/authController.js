@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const ErrorHandler = require("../utils/errorHandler");
 
+// Helper function to generate jwt payload token
 const tokenGenerator = async (user) => {
   return await jwt.sign(
     {
@@ -14,6 +15,38 @@ const tokenGenerator = async (user) => {
       expiresIn: "2d",
     }
   );
+};
+
+// Helper function to attach cookie and send user response
+const sendTokenResponse = async (user, statusCode, res, message) => {
+  const token = await tokenGenerator(user);
+
+  // Cookie security options
+  const cookieOptions = {
+    httpOnly: true, // Crucial: Prevents JavaScript from reading the cookie (protects against XSS)
+    secure: process.env.NODE_ENV === "production", // Enforces HTTPS protocol in production environment
+    sameSite: "lax", // Protects against CSRF attacks in cross-site requests
+    maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days expiration (matches JWT expiration duration)
+  };
+
+  res.status(statusCode)
+    .cookie("token", token, cookieOptions) // Attaches cookie named "token"
+    .json({
+      success: true,
+      message,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        student_id: user.student_id,
+        role: user.role,
+        branch: user.branch,
+        year: user.year,
+        cgpa: user.cgpa,
+        skills: user.skills,
+        resumeLink: user.resumeLink,
+      },
+    });
 };
 
 const registerUser = async (req, res, next) => {
@@ -65,25 +98,7 @@ const registerUser = async (req, res, next) => {
       resumeLink: userRole === "student" ? resumeLink : undefined,
     });
 
-    const token = await tokenGenerator(user);
-
-    res.status(201).json({
-      success: true,
-      message: "User Registered Successfully",
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        student_id: user.student_id,
-        role: user.role,
-        branch: user.branch,
-        year: user.year,
-        cgpa: user.cgpa,
-        skills: user.skills,
-        resumeLink: user.resumeLink,
-      },
-      token,
-    });
+    await sendTokenResponse(user, 201, res, "User Registered Successfully");
   } catch (error) {
     next(error);
   }
@@ -107,18 +122,25 @@ const loginUser = async (req, res, next) => {
       return next(new ErrorHandler("Invalid credentials", 401));
     }
 
-    const token = await tokenGenerator(user);
+    await sendTokenResponse(user, 200, res, "Login Successful");
+  } catch (error) {
+    next(error);
+  }
+};
+
+const logoutUser = async (req, res, next) => {
+  try {
+    // Clear cookie by overwriting it with a past expiration date
+    res.cookie("token", null, {
+      httpOnly: true,
+      expires: new Date(0), // Sets expiration date to past, forcing deletion
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
 
     res.status(200).json({
       success: true,
-      message: "Login Successful",
-      token,
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      }
+      message: "Logged Out Successfully",
     });
   } catch (error) {
     next(error);
@@ -145,5 +167,6 @@ const getProfile = async (req, res, next) => {
 module.exports = {
   registerUser,
   loginUser,
+  logoutUser,
   getProfile,
 };
