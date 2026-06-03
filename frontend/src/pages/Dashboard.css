@@ -2,16 +2,19 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  min-height: 90vh;
-  padding: 40px 20px;
+  min-height: 100vh;
+  width: 100%;
+  padding: 40px 24px;
   box-sizing: border-box;
 }
 
 .dashboard-card {
-  background: var(--bg);
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border);
-  padding: 40px;
-  border-radius: 16px;
+  padding: 48px 40px;
+  border-radius: 24px;
   box-shadow: var(--shadow);
   width: 100%;
   max-width: 800px;
@@ -23,17 +26,18 @@
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid var(--border);
-  padding-bottom: 24px;
-  margin-bottom: 32px;
+  padding-bottom: 28px;
+  margin-bottom: 36px;
   flex-wrap: wrap;
   gap: 16px;
 }
 
 .dashboard-title {
   margin: 0;
-  font-size: 32px;
-  font-weight: 700;
+  font-size: 36px;
+  font-weight: 800;
   color: var(--text-h);
+  letter-spacing: -0.03em;
 }
 
 .dashboard-subtitle {
@@ -46,26 +50,34 @@
   background-color: rgba(239, 68, 68, 0.1);
   color: #ef4444;
   border: 1px solid rgba(239, 68, 68, 0.2);
-  padding: 10px 20px;
-  border-radius: 8px;
+  padding: 12px 24px;
+  border-radius: 12px;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .logout-btn:hover {
   background-color: #ef4444;
   color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+}
+
+.logout-btn:active {
+  transform: translateY(0);
 }
 
 .profile-section h2 {
   font-size: 20px;
   margin-top: 0;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   color: var(--text-h);
   border-left: 4px solid var(--accent);
-  padding-left: 12px;
+  padding-left: 14px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .profile-grid {
@@ -77,7 +89,11 @@
 .profile-item {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 16px 20px;
+  border-radius: 14px;
 }
 
 .profile-item.full-width {
@@ -85,11 +101,11 @@
 }
 
 .profile-item .label {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text);
+  letter-spacing: 0.08em;
+  color: var(--accent);
 }
 
 .profile-item .value {
@@ -102,27 +118,37 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-top: 4px;
 }
 
 .skill-tag {
   background: var(--accent-bg);
   color: var(--accent);
   border: 1px solid var(--accent-border);
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.skill-tag:hover {
+  background: rgba(99, 102, 241, 0.15);
+  transform: translateY(-1px);
 }
 
 .resume-link {
   color: var(--accent);
   text-decoration: none;
-  font-weight: 600;
-  display: inline-block;
-  transition: opacity 0.2s;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.2s ease;
+  margin-top: 4px;
 }
 
 .resume-link:hover {
+  color: #818cf8;
   text-decoration: underline;
 }
 
@@ -131,9 +157,10 @@
   font-size: 18px;
   color: var(--text);
   margin-top: 100px;
+  font-weight: 500;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   .profile-grid {
     grid-template-columns: 1fr;
   }
