@@ -4,6 +4,7 @@ import { useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   const { user, loading } = useAuth();
@@ -36,7 +37,11 @@ function App() {
           {/* Protected route (If user is not logged in, redirect them to login page) */}
           <Route 
             path="/dashboard" 
-            element={user ? <Dashboard /> : <Navigate to="/login" replace />} 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
           />
 
           {/* Base URLs */}
