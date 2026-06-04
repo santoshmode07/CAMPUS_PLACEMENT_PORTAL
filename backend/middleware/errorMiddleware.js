@@ -12,9 +12,13 @@ const errorHandler = (err, req, res, next) => {
   error.message = err.message || "Internal Server Error";
   error.statusCode = err.statusCode || 500;
 
-  // Log error in development (vibrant red logging for readability)
+  // Log error in development (clean warn for user actions, red stack trace for internal server errors)
   if (process.env.NODE_ENV !== "production") {
-    console.error(`\x1b[31m[Error] Status: ${error.statusCode} | Message: ${error.message}\n${err.stack}\x1b[0m`);
+    if (error.statusCode >= 500) {
+      console.error(`\x1b[31m[Error] Status: ${error.statusCode} | Message: ${error.message}\n${err.stack}\x1b[0m`);
+    } else {
+      console.warn(`\x1b[33m[Warning] Status: ${error.statusCode} | Message: ${error.message}\x1b[0m`);
+    }
   }
 
   // Mongoose Bad ObjectId (Cast Error)
