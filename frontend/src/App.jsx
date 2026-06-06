@@ -5,6 +5,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
+import JobsList from './pages/JobsList';
+import JobDetails from './pages/JobDetails';
 
 function App() {
   const { user, loading } = useAuth();
@@ -12,10 +14,9 @@ function App() {
   // If the initial check is verifying cookies with the backend, render a loading state
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <p style={{ fontSize: '18px', color: 'var(--text)', fontWeight: 500 }}>
-          Restoring placement portal session...
-        </p>
+      <div className="loader-container">
+        <div className="loader-spinner"></div>
+        <div className="loader-text">Restoring placement portal session...</div>
       </div>
     );
   }
@@ -40,6 +41,24 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/jobs" 
+            element={
+              <ProtectedRoute>
+                <JobsList />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/jobs/:id" 
+            element={
+              <ProtectedRoute>
+                <JobDetails />
               </ProtectedRoute>
             } 
           />

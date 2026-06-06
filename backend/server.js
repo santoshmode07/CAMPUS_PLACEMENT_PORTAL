@@ -9,12 +9,15 @@ const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
+const path = require("path");
+
 connectDB();
 
 const app=express();
 
 app.use(express.json());
 app.use(cookieParser());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Allow cross-origin requests with credentials (cookies) for both localhost:5173 and localhost:5174
 const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];

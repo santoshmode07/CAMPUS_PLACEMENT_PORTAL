@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Dashboard.css';
 
@@ -22,9 +23,14 @@ const Dashboard = () => {
             <h1 className="dashboard-title">Student Dashboard</h1>
             <p className="dashboard-subtitle">Welcome back, {user.name}!</p>
           </div>
-          <button className="logout-btn" onClick={handleLogout}>
-            Log Out
-          </button>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <Link to="/jobs" className="nav-btn">
+              View Jobs
+            </Link>
+            <button className="logout-btn" onClick={handleLogout}>
+              Log Out
+            </button>
+          </div>
         </div>
 
         <div className="profile-section">

@@ -35,10 +35,13 @@ router.delete(
    checkJobOwner,
    deleteJob
 );
+const { jobUpload } = require("../middleware/uploadMiddleware");
+
 router.post(
   "/",
   protect,
   authorize("admin", "company"),
+  jobUpload,
   createJob
 );
 

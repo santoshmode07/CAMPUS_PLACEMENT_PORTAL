@@ -31,6 +31,14 @@ const jobSchema= new mongoose.Schema({
         required: true,
         enum: ["CSE", "ECE", "EEE", "Mech", "CIVIL"]
     },
+    bannerImage: {
+        type: String,
+        default: ""
+    },
+    galleryImages: {
+        type: [String],
+        default: []
+    },
     createdBy:{
         type: mongoose.Schema.Types.ObjectId,
         ref:"User",
