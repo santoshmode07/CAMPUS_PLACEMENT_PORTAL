@@ -181,6 +181,14 @@ const JobDetails = () => {
         <div className="details-section-card">
           <h2>Job Specifications & JD</h2>
           <p className="jd-text">{job.description}</p>
+          {job.jdLink && (
+            <div className="jd-pdf-link-container" style={{ marginTop: '20px', padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border)', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: 'var(--text)', fontWeight: '500' }}>For more JD info:</span>
+              <a href={job.jdLink} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', fontWeight: '700', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                📄 PDF
+              </a>
+            </div>
+          )}
           
           <h3 className="section-subtitle">Key Responsibilities:</h3>
           <ul className="details-bullets">
@@ -271,14 +279,14 @@ const JobDetails = () => {
                 <span className="field-value">{user.branch} — Year {user.year}</span>
               </div>
               <div className="preview-field full-width">
-                <span className="field-label">Registered Resume (Google Drive Link)</span>
+                <span className="field-label">Registered Resume (PDF Document)</span>
                 <span className="field-value resume-link-value">
                   {user.resumeLink ? (
                     <a href={user.resumeLink} target="_blank" rel="noopener noreferrer" className="resume-url-preview">
-                      📄 View Linked Resume File ↗
+                      📄 View Uploaded Resume PDF ↗
                     </a>
                   ) : (
-                    <span className="no-resume-alert">⚠️ No resume linked in your profile</span>
+                    <span className="no-resume-alert">⚠️ No resume uploaded in your profile</span>
                   )}
                 </span>
               </div>

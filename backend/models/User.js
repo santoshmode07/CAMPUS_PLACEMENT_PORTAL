@@ -48,10 +48,9 @@ const userSchema = new mongoose.Schema({
         validate: {
             validator: function(v) {
                 if (this.role !== "student") return true;
-                if (!v) return false; // Students must have a resumeLink
-                return v.includes("drive.google.com");
+                return !!v; // Ensure resumeLink is present for students
             },
-            message: props => `${props.value} is not a valid Google Drive link! Resume must be a Google Drive link.`
+            message: "Student profile must contain an uploaded resume PDF."
         }
     }
 

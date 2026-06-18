@@ -83,7 +83,7 @@ const getApplicantsForJob = async (req, res, next) => {
 
     const applications = await Application.find({
       job: req.params.jobId,
-    }).populate("student", "name email branch year");
+    }).populate("student", "name email branch year cgpa resumeLink");
 
     res.status(200).json({
       success: true,

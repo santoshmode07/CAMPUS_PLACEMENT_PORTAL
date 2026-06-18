@@ -73,17 +73,108 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Initialize multer instance
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max size limit
-  fileFilter: fileFilter
+// Disk storage specifically for Job Description (JD) PDF files
+const diskStorageForJd = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const jdDir = path.join(__dirname, "../uploads/jds");
+    if (!fs.existsSync(jdDir)) {
+      fs.mkdirSync(jdDir, { recursive: true });
+    }
+    cb(null, jdDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
 });
 
-// Multer fields handler for job postings
-const jobUpload = upload.fields([
+// Composite storage routing files based on fieldname
+const jobStorage = {
+  _handleFile(req, file, cb) {
+    if (file.fieldname === "jdPdf") {
+      diskStorageForJd._handleFile(req, file, cb);
+    } else {
+      storage._handleFile(req, file, cb);
+    }
+  },
+  _removeFile(req, file, cb) {
+    if (file.fieldname === "jdPdf") {
+      diskStorageForJd._removeFile(req, file, cb);
+    } else {
+      storage._removeFile(req, file, cb);
+    }
+  }
+};
+
+// Custom file filter for jobs to support both images and JD PDFs
+const jobFileFilter = (req, file, cb) => {
+  if (file.fieldname === "jdPdf") {
+    const extname = path.extname(file.originalname).toLowerCase() === ".pdf";
+    const mimetype = file.mimetype === "application/pdf";
+    if (extname && mimetype) {
+      return cb(null, true);
+    } else {
+      return cb(new Error("Only PDF files (.pdf) are allowed for Job Description (JD)"), false);
+    }
+  } else {
+    const allowedTypes = /jpeg|jpg|png|webp|gif/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    if (extname && mimetype) {
+      return cb(null, true);
+    } else {
+      return cb(new Error("Only images (jpg, jpeg, png, webp, gif) are allowed for banners and gallery"), false);
+    }
+  }
+};
+
+// Initialize multer instance for jobs
+const jobMulter = multer({
+  storage: jobStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max size limit for job uploads
+  fileFilter: jobFileFilter
+});
+
+// Multer fields handler for job postings (supporting images and the PDF JD)
+const jobUpload = jobMulter.fields([
   { name: "bannerImage", maxCount: 1 },
-  { name: "galleryImages", maxCount: 6 }
+  { name: "galleryImages", maxCount: 6 },
+  { name: "jdPdf", maxCount: 1 }
 ]);
 
-module.exports = { jobUpload };
+// Resume storage configuration: Store resumes locally on disk to prevent Cloudinary account ACL restrictions for raw PDF delivery
+const resumeUploadDir = path.join(__dirname, "../uploads/resumes");
+if (!fs.existsSync(resumeUploadDir)) {
+  fs.mkdirSync(resumeUploadDir, { recursive: true });
+}
+
+const resumeStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, resumeUploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+// PDF specific file filter
+const resumeFileFilter = (req, file, cb) => {
+  const extname = path.extname(file.originalname).toLowerCase() === ".pdf";
+  const mimetype = file.mimetype === "application/pdf";
+
+  if (extname && mimetype) {
+    return cb(null, true);
+  } else {
+    cb(new Error("Only PDF files (.pdf) are allowed for resumes"), false);
+  }
+};
+
+// Initialize multer for resume upload
+const resumeUpload = multer({
+  storage: resumeStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  fileFilter: resumeFileFilter
+}).single("resume");
+
+module.exports = { jobUpload, resumeUpload };

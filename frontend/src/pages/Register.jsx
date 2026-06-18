@@ -19,7 +19,7 @@ const Register = () => {
     year: '1',     // default year
     cgpa: '',
     skills: '',    // entered as comma-separated list
-    resumeLink: '',
+    resumeFile: null,
   });
 
   const [loading, setLoading] = useState(false);
@@ -39,43 +39,47 @@ const Register = () => {
     setError('');
     setSuccess('');
 
-    // Prepare the payload to match what the backend expects for a student
-    const payload = {
-      name: formData.name,
-      email: formData.email,
-      student_id: formData.student_id,
-      password: formData.password,
-      role: 'student', // Hardcoded student role
-      branch: formData.branch,
-      year: Number(formData.year),
-    };
+    if (!formData.resumeFile) {
+      setError('Please select a PDF resume file to upload.');
+      setLoading(false);
+      return;
+    }
 
-    // Validate CGPA
+    if (formData.resumeFile.type !== 'application/pdf') {
+      setError('Only PDF files (.pdf) are allowed for resume upload.');
+      setLoading(false);
+      return;
+    }
+
+    // Split comma-separated skills input into an array of trimmed strings
+    const skillsArray = formData.skills
+      .split(',')
+      .map((skill) => skill.trim())
+      .filter((skill) => skill.length > 0);
+
     const cgpaNum = parseFloat(formData.cgpa);
     if (isNaN(cgpaNum) || cgpaNum < 0 || cgpaNum > 10) {
       setError('CGPA must be a number between 0 and 10');
       setLoading(false);
       return;
     }
-    payload.cgpa = cgpaNum;
 
-    // Split comma-separated skills input into an array of trimmed strings
-    payload.skills = formData.skills
-      .split(',')
-      .map((skill) => skill.trim())
-      .filter((skill) => skill.length > 0);
-
-    // Validate Google Drive Resume Link
-    if (!formData.resumeLink.includes('drive.google.com')) {
-      setError('Resume Link must be a valid Google Drive link containing drive.google.com');
-      setLoading(false);
-      return;
-    }
-    payload.resumeLink = formData.resumeLink;
+    // Build multipart FormData payload
+    const formDataPayload = new FormData();
+    formDataPayload.append('name', formData.name);
+    formDataPayload.append('email', formData.email);
+    formDataPayload.append('student_id', formData.student_id);
+    formDataPayload.append('password', formData.password);
+    formDataPayload.append('role', 'student');
+    formDataPayload.append('branch', formData.branch);
+    formDataPayload.append('year', Number(formData.year));
+    formDataPayload.append('cgpa', cgpaNum);
+    formDataPayload.append('skills', JSON.stringify(skillsArray));
+    formDataPayload.append('resume', formData.resumeFile);
 
     try {
       // Register via AuthContext. The backend automatically sets the cookie.
-      await register(payload);
+      await register(formDataPayload);
 
       setSuccess('Student Account Registered Successfully! Redirecting...');
 
@@ -215,14 +219,18 @@ const Register = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="resumeLink">Google Drive Resume Link</label>
+              <label htmlFor="resumeFile">Upload Resume (PDF format)</label>
               <input
-                type="url"
-                id="resumeLink"
-                name="resumeLink"
-                value={formData.resumeLink}
-                onChange={handleChange}
-                placeholder="https://drive.google.com/..."
+                type="file"
+                id="resumeFile"
+                name="resume"
+                accept=".pdf"
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    resumeFile: e.target.files[0]
+                  });
+                }}
                 required
               />
             </div>

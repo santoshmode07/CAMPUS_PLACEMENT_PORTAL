@@ -50,7 +50,12 @@ export const AuthProvider = ({ children }) => {
    * Sign Up logic
    */
   const register = async (payload) => {
-    const response = await api.post('/auth/register', payload);
+    const config = payload instanceof FormData ? {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    } : {};
+    const response = await api.post('/auth/register', payload, config);
     if (response.data.success) {
       setUser(response.data.user);
     }

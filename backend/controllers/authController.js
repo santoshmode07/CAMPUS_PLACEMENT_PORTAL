@@ -51,7 +51,7 @@ const sendTokenResponse = async (user, statusCode, res, message) => {
 
 const registerUser = async (req, res, next) => {
   try {
-    const { name, email, student_id, password, role, branch, year, cgpa, skills, resumeLink } = req.body;
+    const { name, email, student_id, password, role, branch, year, cgpa, skills } = req.body;
 
     const userRole = role || "student";
 
@@ -59,18 +59,44 @@ const registerUser = async (req, res, next) => {
       return next(new ErrorHandler("Please fill in all required fields", 400));
     }
 
+    let parsedSkills = [];
+    let cgpaNum;
+    let yearNum = Number(year);
+    let resolvedResumeLink;
+
     if (userRole === "student") {
-      if (cgpa === undefined || !skills || !resumeLink) {
-        return next(new ErrorHandler("Students must provide cgpa, skills, and a Google Drive resume link", 400));
+      cgpaNum = cgpa !== undefined ? Number(cgpa) : undefined;
+      
+      // Parse skills: handle array, JSON string, or comma-separated string formats
+      if (skills) {
+        if (typeof skills === "string") {
+          try {
+            parsedSkills = JSON.parse(skills);
+          } catch (e) {
+            parsedSkills = skills.split(",").map(s => s.trim()).filter(Boolean);
+          }
+        } else if (Array.isArray(skills)) {
+          parsedSkills = skills;
+        }
       }
-      if (typeof cgpa !== "number" || cgpa < 0 || cgpa > 10) {
+
+      // Extract uploaded resume PDF file
+      if (!req.file) {
+        return next(new ErrorHandler("Please upload your resume in PDF format", 400));
+      }
+
+      if (req.file.path && req.file.path.startsWith("http")) {
+        resolvedResumeLink = req.file.path; // Cloudinary secure raw URL
+      } else {
+        resolvedResumeLink = `${req.protocol}://${req.get("host")}/uploads/resumes/${req.file.filename}`;
+      }
+
+      // Validations
+      if (cgpaNum === undefined || parsedSkills.length === 0 || !resolvedResumeLink) {
+        return next(new ErrorHandler("Students must provide CGPA, skills, and a PDF resume upload", 400));
+      }
+      if (isNaN(cgpaNum) || cgpaNum < 0 || cgpaNum > 10) {
         return next(new ErrorHandler("CGPA must be a number between 0 and 10", 400));
-      }
-      if (!Array.isArray(skills)) {
-        return next(new ErrorHandler("Skills must be an array of strings", 400));
-      }
-      if (typeof resumeLink !== "string" || !resumeLink.includes("drive.google.com")) {
-        return next(new ErrorHandler("Resume link must be a valid Google Drive link containing drive.google.com", 400));
       }
     }
 
@@ -92,10 +118,10 @@ const registerUser = async (req, res, next) => {
       password: hashedPassword,
       role: userRole,
       branch,
-      year,
-      cgpa: userRole === "student" ? cgpa : undefined,
-      skills: userRole === "student" ? skills : undefined,
-      resumeLink: userRole === "student" ? resumeLink : undefined,
+      year: yearNum,
+      cgpa: userRole === "student" ? cgpaNum : undefined,
+      skills: userRole === "student" ? parsedSkills : undefined,
+      resumeLink: userRole === "student" ? resolvedResumeLink : undefined,
     });
 
     await sendTokenResponse(user, 201, res, "User Registered Successfully");

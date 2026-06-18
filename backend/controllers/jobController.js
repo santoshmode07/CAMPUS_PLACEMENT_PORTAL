@@ -59,6 +59,12 @@ const createJob = async (req, res, next) => {
       }
     }
 
+    let jdPdfUrl = "";
+    if (req.files && req.files.jdPdf && req.files.jdPdf[0]) {
+      const file = req.files.jdPdf[0];
+      jdPdfUrl = `${req.protocol}://${req.get("host")}/uploads/jds/${file.filename}`;
+    }
+
     const job = await Job.create({
       title,
       company,
@@ -69,6 +75,7 @@ const createJob = async (req, res, next) => {
       eligibleBranches: branches,
       bannerImage: bannerImageUrl,
       galleryImages: galleryImageUrls,
+      jdLink: jdPdfUrl,
       createdBy: req.user.id,
     });
 
